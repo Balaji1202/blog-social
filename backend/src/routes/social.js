@@ -1,7 +1,7 @@
 const express = require("express");
 const { authenticateToken } = require("../middleware/auth");
-const socialMediaIntegrationService = require("../services/socialMediaIntegration");
-const contentSummarizationService = require("../services/contentSummarization");
+const socialMediaIntegrationService = require("../services/social-media-integration");
+const contentSummarizationService = require("../services/content-summarization");
 const { SocialPost, BlogPost } = require("../models");
 
 const router = express.Router();

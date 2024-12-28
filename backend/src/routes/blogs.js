@@ -1,7 +1,7 @@
 const express = require("express");
 const { authenticateToken } = require("../middleware/auth");
-const blogIntegrationService = require("../services/blogIntegration");
-const { BlogPost } = require("../models/BlogPost");
+const blogIntegrationService = require("../services/blog-integration");
+const { BlogPost } = require("../models/blog-post");
 
 const router = express.Router();
 

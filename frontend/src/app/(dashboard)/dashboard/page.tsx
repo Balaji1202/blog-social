@@ -1,12 +1,12 @@
 'use client';
 
 import { FiFileText, FiShare2, FiLink } from 'react-icons/fi';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import StatsCard from '@/components/dashboard/StatsCard';
-import StatsGrid from '@/components/dashboard/StatsGrid';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import ErrorMessage from '@/components/common/ErrorMessage';
-import { Title } from '@/components/common/Typography';
+import DashboardLayout from '@/components/layout/dashboard-layout';
+import StatsCard from '@/components/dashboard/stats-card';
+import StatsGrid from '@/components/dashboard/stats-grid';
+import LoadingSpinner from '@/components/common/loading-spinner';
+import ErrorMessage from '@/components/common/error-message';
+import { Title } from '@/components/common/typography';
 import { useStats } from '@/data/hooks/useStats';
 
 export default function DashboardPage() {

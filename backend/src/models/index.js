@@ -3,9 +3,9 @@ const { DataTypes } = require("sequelize");
 
 // Import models
 const User = require("./user");
-const PlatformConnection = require("./PlatformConnection");
-const BlogPost = require("./BlogPost");
-const SocialPost = require("./SocialPost");
+const PlatformConnection = require("./platform-connection");
+const BlogPost = require("./blog-post");
+const SocialPost = require("./social-post");
 
 // Initialize models
 const models = {

@@ -1,20 +1,20 @@
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const session = require("express-session");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const winston = require("winston");
 const passport = require("passport");
-const session = require("express-session");
 const { validateOAuthConfig } = require("./config/oauth");
 const { sequelize, PlatformConnection } = require("./config/database");
+const { authenticateToken } = require("./middleware/auth");
 
 // Import routes
 const authRoutes = require("./routes/auth");
-const blogRoutes = require("./routes/blogs");
+const oauthRoutes = require("./routes/oauth");
+const blogsRoutes = require("./routes/blogs");
 const socialRoutes = require("./routes/social");
 const statsRoutes = require("./routes/stats");
-const oauthRoutes = require("./routes/oauth");
 
 // Create Express app
 const app = express();
@@ -40,6 +40,29 @@ if (process.env.NODE_ENV !== "production") {
 // Validate OAuth configuration on startup
 validateOAuthConfig();
 
+// Security middleware
+app.use(helmet());
+app.use(
+	rateLimit({
+		windowMs: 15 * 60 * 1000, // 15 minutes
+		max: 100, // limit each IP to 100 requests per windowMs
+	})
+);
+
+// Session configuration
+app.use(
+	session({
+		secret: process.env.SESSION_SECRET || "your-secret-key",
+		resave: false,
+		saveUninitialized: false,
+		cookie: {
+			secure: process.env.NODE_ENV === "production",
+			httpOnly: true,
+			maxAge: 24 * 60 * 60 * 1000, // 24 hours
+		},
+	})
+);
+
 // Middleware
 app.use(
 	cors({
@@ -50,36 +73,18 @@ app.use(
 	})
 );
 app.use(express.json());
-app.use(helmet());
-app.use(
-	rateLimit({
-		windowMs: 15 * 60 * 1000, // 15 minutes
-		max: 100, // Limit each IP to 100 requests per windowMs
-	})
-);
-app.use(
-	session({
-		secret: process.env.SESSION_SECRET,
-		resave: false,
-		saveUninitialized: false,
-		cookie: {
-			secure: process.env.NODE_ENV === "production",
-			httpOnly: true,
-			maxAge: 24 * 60 * 60 * 1000, // 24 hours
-		},
-	})
-);
+app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/blogs", blogRoutes);
+app.use("/api/oauth", oauthRoutes);
+app.use("/api/blogs", blogsRoutes);
 app.use("/api/social", socialRoutes);
 app.use("/api/stats", statsRoutes);
-app.use("/api/oauth", oauthRoutes);
 
 // Platform connections routes
-app.get("/api/platform-connections", authenticateUser, async (req, res) => {
+app.get("/api/platform-connections", authenticateToken, async (req, res) => {
 	try {
 		const connections = await PlatformConnection.findAll({
 			where: { userId: req.user.id },
@@ -93,7 +98,7 @@ app.get("/api/platform-connections", authenticateUser, async (req, res) => {
 
 app.post(
 	"/api/platform-connections/:platform/disconnect",
-	authenticateUser,
+	authenticateToken,
 	async (req, res) => {
 		try {
 			const { platform } = req.params;
@@ -117,21 +122,7 @@ app.post(
 // Error handling middleware
 app.use((err, req, res, next) => {
 	logger.error(err.stack);
-	res.status(500).send("Something broke!");
-});
-
-// Sync database and start server
-sequelize.sync().then(() => {
-	const PORT = process.env.PORT || 3001;
-	app.listen(PORT, async () => {
-		try {
-			await sequelize.authenticate();
-			logger.info("Database connection has been established successfully.");
-			logger.info(`Server is running on port ${PORT}`);
-		} catch (error) {
-			logger.error("Unable to connect to the database:", error);
-		}
-	});
+	res.status(500).json({ error: "Something went wrong!" });
 });
 
 module.exports = app;
