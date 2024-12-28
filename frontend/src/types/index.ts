@@ -1,4 +1,6 @@
-import { SocialPlatform, CMSPlatform, Platform } from '../config/platforms';
+import { SocialPlatform, CMSPlatform } from '@/config/platforms';
+
+export type Platform = SocialPlatform | CMSPlatform;
 
 export interface User {
   id: string;
