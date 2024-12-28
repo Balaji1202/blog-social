@@ -10,6 +10,7 @@ const passport = require('passport');
 const authRoutes = require('./routes/auth');
 const blogRoutes = require('./routes/blogs');
 const socialRoutes = require('./routes/social');
+const statsRoutes = require('./routes/stats');
 
 // Import database configuration
 const { sequelize } = require('./config/database');
@@ -52,6 +53,7 @@ app.use(passport.initialize());
 app.use('/api/auth', authRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/social', socialRoutes);
+app.use('/api/stats', statsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
