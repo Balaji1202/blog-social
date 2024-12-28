@@ -6,7 +6,7 @@ import StatsCard from '@/components/dashboard/stats-card';
 import StatsGrid from '@/components/dashboard/stats-grid';
 import LoadingSpinner from '@/components/common/loading-spinner';
 import ErrorMessage from '@/components/common/error-message';
-import { Title } from '@/components/common/Typography';
+import { Title } from '@/components/common/typography';
 import { useStats } from '@/data/hooks/useStats';
 
 export default function DashboardPage() {
