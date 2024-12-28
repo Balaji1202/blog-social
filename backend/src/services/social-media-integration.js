@@ -1,6 +1,6 @@
 const axios = require("axios");
 const { SocialPost, PlatformConnection } = require("../models");
-const contentSummarizationService = require("./contentSummarization");
+const contentSummarizationService = require("./content-summarization");
 const { SocialPlatform } = require("../config/platforms");
 
 class SocialMediaIntegrationService {

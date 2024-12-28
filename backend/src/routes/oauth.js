@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const { isValidPlatform } = require("../config/platforms");
-const oauthService = require("../services/oauthService");
-const { authenticateUser } = require("../middleware/auth");
+const oauthService = require("../services/oauth-service");
+const { authenticateToken } = require("../middleware/auth");
 const crypto = require("crypto");
 
 // Generate OAuth state
 const generateState = () => crypto.randomBytes(32).toString("hex");
 
 // Initialize OAuth flow
-router.get("/connect/:platform", authenticateUser, async (req, res) => {
+router.get("/connect/:platform", authenticateToken, async (req, res) => {
 	try {
 		const { platform } = req.params;
 		if (!isValidPlatform(platform)) {
@@ -29,7 +29,7 @@ router.get("/connect/:platform", authenticateUser, async (req, res) => {
 });
 
 // OAuth callback handler
-router.get("/callback/:platform", authenticateUser, async (req, res) => {
+router.get("/callback/:platform", authenticateToken, async (req, res) => {
 	try {
 		const { platform } = req.params;
 		const { code, state } = req.query;

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { ErrorText } from '../Typography';
+import { ErrorText } from '../typography';
 
 const ErrorContainer = styled.div`
   padding: 1rem;
