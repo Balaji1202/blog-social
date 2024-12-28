@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { SocialPost, PlatformConnection } = require('../models');
 const contentSummarizationService = require('./contentSummarization');
+const { SocialPlatform } = require('../config/platforms');
 
 class SocialMediaIntegrationService {
   async createSocialPost(blogPost, platform) {
@@ -41,10 +42,10 @@ class SocialMediaIntegrationService {
       const connection = await PlatformConnection.findByPk(socialPost.platformConnectionId);
       
       switch (connection.platform) {
-        case 'LINKEDIN':
+        case SocialPlatform.LINKEDIN:
           await this.publishToLinkedIn(socialPost, connection);
           break;
-        case 'TWITTER':
+        case SocialPlatform.TWITTER:
           await this.publishToTwitter(socialPost, connection);
           break;
         default:

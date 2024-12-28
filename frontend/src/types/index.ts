@@ -1,3 +1,5 @@
+import { SocialPlatform, CMSPlatform, Platform } from '../config/platforms';
+
 export interface User {
   id: string;
   name: string;
@@ -15,7 +17,7 @@ export interface BlogPost {
   content: string;
   url: string;
   publishedAt: string;
-  platform: string;
+  platform: CMSPlatform;
   summary?: string;
   metadata: Record<string, any>;
 }
@@ -24,7 +26,7 @@ export interface SocialPost {
   id: string;
   blogPostId: string;
   content: string;
-  platform: 'LINKEDIN' | 'TWITTER';
+  platform: SocialPlatform;
   status: 'PENDING' | 'PUBLISHED' | 'FAILED';
   publishedAt?: string;
   platformPostId?: string;
@@ -37,15 +39,7 @@ export interface SocialPost {
 
 export interface PlatformConnection {
   id: string;
-  platform:
-    | 'WEBFLOW'
-    | 'WORDPRESS'
-    | 'MEDIUM'
-    | 'LINKEDIN'
-    | 'TWITTER'
-    | 'twitter'
-    | 'linkedin'
-    | 'facebook';
+  platform: Platform;
   connected: boolean;
   platformUserId?: string;
   platformUserName?: string;
