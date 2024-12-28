@@ -1,151 +1,154 @@
-const axios = require('axios');
-const { SocialPost, PlatformConnection } = require('../models');
-const contentSummarizationService = require('./contentSummarization');
+const axios = require("axios");
+const { SocialPost, PlatformConnection } = require("../models");
+const contentSummarizationService = require("./contentSummarization");
+const { SocialPlatform } = require("../config/platform");
 
 class SocialMediaIntegrationService {
-  async createSocialPost(blogPost, platform) {
-    try {
-      const connection = await PlatformConnection.findOne({
-        where: {
-          userId: blogPost.userId,
-          platform
-        }
-      });
+	async createSocialPost(blogPost, platform) {
+		try {
+			const connection = await PlatformConnection.findOne({
+				where: {
+					userId: blogPost.userId,
+					platform,
+				},
+			});
 
-      if (!connection) {
-        throw new Error(`No ${platform} connection found for user`);
-      }
+			if (!connection) {
+				throw new Error(`No ${platform} connection found for user`);
+			}
 
-      const summary = await contentSummarizationService.summarizeContent(
-        blogPost.content,
-        platform
-      );
+			const summary = await contentSummarizationService.summarizeContent(
+				blogPost.content,
+				platform
+			);
 
-      const socialPost = await SocialPost.create({
-        blogPostId: blogPost.id,
-        platformConnectionId: connection.id,
-        content: summary,
-        platform,
-        status: 'PENDING'
-      });
+			const socialPost = await SocialPost.create({
+				blogPostId: blogPost.id,
+				platformConnectionId: connection.id,
+				content: summary,
+				platform,
+				status: "PENDING",
+			});
 
-      await this.publishPost(socialPost);
-      return socialPost;
-    } catch (error) {
-      throw new Error(`Error creating social post: ${error.message}`);
-    }
-  }
+			await this.publishPost(socialPost);
+			return socialPost;
+		} catch (error) {
+			throw new Error(`Error creating social post: ${error.message}`);
+		}
+	}
 
-  async publishPost(socialPost) {
-    try {
-      const connection = await PlatformConnection.findByPk(socialPost.platformConnectionId);
-      
-      switch (connection.platform) {
-        case 'LINKEDIN':
-          await this.publishToLinkedIn(socialPost, connection);
-          break;
-        case 'TWITTER':
-          await this.publishToTwitter(socialPost, connection);
-          break;
-        default:
-          throw new Error(`Unsupported platform: ${connection.platform}`);
-      }
+	async publishPost(socialPost) {
+		try {
+			const connection = await PlatformConnection.findByPk(
+				socialPost.platformConnectionId
+			);
 
-      await socialPost.update({
-        status: 'PUBLISHED',
-        publishedAt: new Date()
-      });
-    } catch (error) {
-      await socialPost.update({
-        status: 'FAILED',
-        metadata: { error: error.message }
-      });
-      throw error;
-    }
-  }
+			switch (connection.platform) {
+				case SocialPlatform.LINKEDIN:
+					await this.publishToLinkedIn(socialPost, connection);
+					break;
+				case SocialPlatform.TWITTER:
+					await this.publishToTwitter(socialPost, connection);
+					break;
+				default:
+					throw new Error(`Unsupported platform: ${connection.platform}`);
+			}
 
-  async publishToLinkedIn(socialPost, connection) {
-    try {
-      const response = await axios.post(
-        'https://api.linkedin.com/v2/ugcPosts',
-        {
-          author: `urn:li:person:${connection.platformUserId}`,
-          lifecycleState: 'PUBLISHED',
-          specificContent: {
-            'com.linkedin.ugc.ShareContent': {
-              shareCommentary: {
-                text: socialPost.content
-              },
-              shareMediaCategory: 'NONE'
-            }
-          },
-          visibility: {
-            'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC'
-          }
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${connection.accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+			await socialPost.update({
+				status: "PUBLISHED",
+				publishedAt: new Date(),
+			});
+		} catch (error) {
+			await socialPost.update({
+				status: "FAILED",
+				metadata: { error: error.message },
+			});
+			throw error;
+		}
+	}
 
-      return response.data;
-    } catch (error) {
-      throw new Error(`Error publishing to LinkedIn: ${error.message}`);
-    }
-  }
+	async publishToLinkedIn(socialPost, connection) {
+		try {
+			const response = await axios.post(
+				"https://api.linkedin.com/v2/ugcPosts",
+				{
+					author: `urn:li:person:${connection.platformUserId}`,
+					lifecycleState: "PUBLISHED",
+					specificContent: {
+						"com.linkedin.ugc.ShareContent": {
+							shareCommentary: {
+								text: socialPost.content,
+							},
+							shareMediaCategory: "NONE",
+						},
+					},
+					visibility: {
+						"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC",
+					},
+				},
+				{
+					headers: {
+						Authorization: `Bearer ${connection.accessToken}`,
+						"Content-Type": "application/json",
+					},
+				}
+			);
 
-  async publishToTwitter(socialPost, connection) {
-    try {
-      const response = await axios.post(
-        'https://api.twitter.com/2/tweets',
-        {
-          text: socialPost.content
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${connection.accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+			return response.data;
+		} catch (error) {
+			throw new Error(`Error publishing to LinkedIn: ${error.message}`);
+		}
+	}
 
-      return response.data;
-    } catch (error) {
-      throw new Error(`Error publishing to Twitter: ${error.message}`);
-    }
-  }
+	async publishToTwitter(socialPost, connection) {
+		try {
+			const response = await axios.post(
+				"https://api.twitter.com/2/tweets",
+				{
+					text: socialPost.content,
+				},
+				{
+					headers: {
+						Authorization: `Bearer ${connection.accessToken}`,
+						"Content-Type": "application/json",
+					},
+				}
+			);
 
-  async schedulePost(blogPost, platform, scheduledTime) {
-    try {
-      const summary = await contentSummarizationService.summarizeContent(
-        blogPost.content,
-        platform
-      );
+			return response.data;
+		} catch (error) {
+			throw new Error(`Error publishing to Twitter: ${error.message}`);
+		}
+	}
 
-      const connection = await PlatformConnection.findOne({
-        where: {
-          userId: blogPost.userId,
-          platform
-        }
-      });
+	async schedulePost(blogPost, platform, scheduledTime) {
+		try {
+			const summary = await contentSummarizationService.summarizeContent(
+				blogPost.content,
+				platform
+			);
 
-      const socialPost = await SocialPost.create({
-        blogPostId: blogPost.id,
-        platformConnectionId: connection.id,
-        content: summary,
-        platform,
-        status: 'PENDING',
-        metadata: { scheduledTime }
-      });
+			const connection = await PlatformConnection.findOne({
+				where: {
+					userId: blogPost.userId,
+					platform,
+				},
+			});
 
-      return socialPost;
-    } catch (error) {
-      throw new Error(`Error scheduling social post: ${error.message}`);
-    }
-  }
+			const socialPost = await SocialPost.create({
+				blogPostId: blogPost.id,
+				platformConnectionId: connection.id,
+				content: summary,
+				platform,
+				status: "PENDING",
+				metadata: { scheduledTime },
+			});
+
+			return socialPost;
+		} catch (error) {
+			throw new Error(`Error scheduling social post: ${error.message}`);
+		}
+	}
 }
 
 module.exports = new SocialMediaIntegrationService();
