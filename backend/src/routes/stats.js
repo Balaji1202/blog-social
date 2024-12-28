@@ -2,7 +2,7 @@ const express = require("express");
 const { Sequelize, DataTypes } = require("sequelize");
 const { sequelize } = require("../config/database");
 const UserModel = require("../models/user");
-const { PlatformConnection } = require("../models/PlatformConnection");
+const { PlatformConnection } = require("../models/platform-connection");
 const { authenticateToken } = require("../middleware/auth");
 
 const User = UserModel(sequelize, DataTypes);

@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const { Sequelize, DataTypes } = require("sequelize");
 const { sequelize } = require("../config/database");
 const UserModel = require("../models/user");
-const { PlatformConnection } = require("../models/PlatformConnection");
+const { PlatformConnection } = require("../models/platform-connection");
 
 const User = UserModel(sequelize, DataTypes);
 const router = express.Router();
