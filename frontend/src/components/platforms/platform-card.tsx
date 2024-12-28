@@ -1,6 +1,11 @@
 import React from 'react';
 import { Platform } from '@/types';
-import { SocialPlatform, CMSPlatform, isSocialPlatform, isCMSPlatform } from '@/config/platforms';
+import {
+  SocialPlatform,
+  CMSPlatform,
+  isSocialPlatform,
+  isCMSPlatform,
+} from '@/config/platforms';
 import { FaTwitter, FaLinkedin, FaWordpress, FaMedium } from 'react-icons/fa';
 import { SiWebflow } from 'react-icons/si';
 import usePlatformConnections from '@/store/platformConnections';
@@ -26,7 +31,8 @@ const PlatformCard: React.FC<PlatformCardProps> = ({
   isConnected,
   userName,
 }) => {
-  const { initiateOAuth, disconnectPlatform, connecting } = usePlatformConnections();
+  const { initiateOAuth, disconnectPlatform, connecting } =
+    usePlatformConnections();
 
   const getPlatformIcon = () => {
     switch (platform) {

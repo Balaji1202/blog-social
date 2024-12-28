@@ -39,9 +39,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <S.UserInfo>
             <S.UserName>Welcome, {user.name}</S.UserName>
           </S.UserInfo>
-          <S.LogoutButton onClick={handleLogout}>
-            Logout
-          </S.LogoutButton>
+          <S.LogoutButton onClick={handleLogout}>Logout</S.LogoutButton>
         </S.HeaderContent>
       </S.Header>
       <S.Main>{children}</S.Main>

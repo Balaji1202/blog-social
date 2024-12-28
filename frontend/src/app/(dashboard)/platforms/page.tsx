@@ -9,13 +9,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function PlatformsPage() {
   const searchParams = useSearchParams();
-  const {
-    connections,
-    loading,
-    error,
-    fetchConnections,
-    completeOAuth
-  } = usePlatformConnections();
+  const { connections, loading, error, fetchConnections, completeOAuth } =
+    usePlatformConnections();
 
   useEffect(() => {
     fetchConnections();
@@ -28,16 +23,17 @@ export default function PlatformsPage() {
     const state = searchParams.get('state');
 
     if (platform && code && state) {
-      completeOAuth(platform as any, code, state)
-        .catch(error => console.error('OAuth completion error:', error));
+      completeOAuth(platform as any, code, state).catch((error) =>
+        console.error('OAuth completion error:', error)
+      );
     }
   }, [searchParams, completeOAuth]);
 
   const getConnectionStatus = (platform: string) => {
-    const connection = connections.find(conn => conn.platform === platform);
+    const connection = connections.find((conn) => conn.platform === platform);
     return {
       isConnected: !!connection?.connected,
-      userName: connection?.platformUserName
+      userName: connection?.platformUserName,
     };
   };
 
@@ -52,7 +48,7 @@ export default function PlatformsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Platform Connections</h1>
-      
+
       {error && (
         <Alert variant="destructive" className="mb-6">
           <AlertDescription>{error}</AlertDescription>
@@ -62,7 +58,7 @@ export default function PlatformsPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-6">
           <h2 className="text-xl font-semibold mb-4">Social Media Platforms</h2>
-          {Object.values(SocialPlatform).map(platform => {
+          {Object.values(SocialPlatform).map((platform) => {
             const { isConnected, userName } = getConnectionStatus(platform);
             return (
               <PlatformCard
@@ -76,8 +72,10 @@ export default function PlatformsPage() {
         </div>
 
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold mb-4">Content Management Systems</h2>
-          {Object.values(CMSPlatform).map(platform => {
+          <h2 className="text-xl font-semibold mb-4">
+            Content Management Systems
+          </h2>
+          {Object.values(CMSPlatform).map((platform) => {
             const { isConnected, userName } = getConnectionStatus(platform);
             return (
               <PlatformCard

@@ -9,7 +9,11 @@ interface PlatformConnectionsState {
   connecting: { [key in Platform]?: boolean };
   fetchConnections: () => Promise<void>;
   initiateOAuth: (platform: Platform) => Promise<string>;
-  completeOAuth: (platform: Platform, code: string, state: string) => Promise<void>;
+  completeOAuth: (
+    platform: Platform,
+    code: string,
+    state: string
+  ) => Promise<void>;
   disconnectPlatform: (platform: Platform) => Promise<void>;
 }
 
@@ -34,9 +38,9 @@ const usePlatformConnections = create<PlatformConnectionsState>((set, get) => ({
 
   initiateOAuth: async (platform: Platform) => {
     try {
-      set(state => ({
+      set((state) => ({
         connecting: { ...state.connecting, [platform]: true },
-        error: null
+        error: null,
       }));
 
       const response = await api.get(`/oauth/connect/${platform}`);
@@ -46,8 +50,8 @@ const usePlatformConnections = create<PlatformConnectionsState>((set, get) => ({
       console.error('OAuth initiation error:', error);
       throw error;
     } finally {
-      set(state => ({
-        connecting: { ...state.connecting, [platform]: false }
+      set((state) => ({
+        connecting: { ...state.connecting, [platform]: false },
       }));
     }
   },
@@ -74,7 +78,7 @@ const usePlatformConnections = create<PlatformConnectionsState>((set, get) => ({
       console.error('Platform disconnection error:', error);
       throw error;
     }
-  }
+  },
 }));
 
 export default usePlatformConnections;

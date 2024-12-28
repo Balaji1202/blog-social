@@ -21,8 +21,8 @@ const IconWrapper = styled.div`
   align-items: center;
   justify-content: center;
   margin-bottom: 1rem;
-  background: ${props => props.color}15;
-  color: ${props => props.color};
+  background: ${(props) => props.color}15;
+  color: ${(props) => props.color};
 `;
 
 const Title = styled.h3`
@@ -44,7 +44,12 @@ interface StatsCardProps {
   color: string;
 }
 
-export default function StatsCard({ title, value, icon: Icon, color }: StatsCardProps) {
+export default function StatsCard({
+  title,
+  value,
+  icon: Icon,
+  color,
+}: StatsCardProps) {
   return (
     <Card>
       <IconWrapper color={color}>

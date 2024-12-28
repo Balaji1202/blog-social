@@ -13,17 +13,20 @@ A web application that automatically fetches content from multiple blog platform
 ## Tech Stack
 
 ### Frontend
+
 - Next.js (React)
 - Tailwind CSS
 - TypeScript
 
 ### Backend
+
 - Node.js
 - Express
 - PostgreSQL
 - Redis (caching)
 
 ### External Services
+
 - OpenAI GPT API for summarization
 - Blog Platform APIs (Webflow, WordPress, Medium)
 - Social Media APIs (LinkedIn, Twitter)
@@ -31,6 +34,7 @@ A web application that automatically fetches content from multiple blog platform
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js >= 18
 - PostgreSQL >= 14
 - Redis >= 6
@@ -38,12 +42,14 @@ A web application that automatically fetches content from multiple blog platform
 ### Installation
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/yourusername/blog-social.git
 cd blog-social
 ```
 
 2. Install dependencies
+
 ```bash
 # Install frontend dependencies
 cd frontend
@@ -55,6 +61,7 @@ npm install
 ```
 
 3. Set up environment variables
+
 ```bash
 # Frontend
 cp frontend/.env.example frontend/.env.local
@@ -64,6 +71,7 @@ cp backend/.env.example backend/.env
 ```
 
 4. Start development servers
+
 ```bash
 # Frontend
 cd frontend
@@ -77,12 +85,14 @@ npm run dev
 ## Environment Variables
 
 ### Frontend (.env.local)
+
 ```
 NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_OAUTH_CALLBACK_URL=http://localhost:3000/auth/callback
 ```
 
 ### Backend (.env)
+
 ```
 PORT=3001
 DATABASE_URL=postgresql://user:password@localhost:5432/blog_social

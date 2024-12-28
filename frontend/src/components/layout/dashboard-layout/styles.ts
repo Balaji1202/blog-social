@@ -44,7 +44,7 @@ export const LogoutButton = styled(BaseButton)`
   background: none;
   color: #4b5563;
   padding: 0.5rem 1rem;
-  
+
   &:hover {
     background: #f3f4f6;
   }

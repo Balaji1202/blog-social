@@ -1,13 +1,13 @@
 export enum SocialPlatform {
   TWITTER = 'TWITTER',
   LINKEDIN = 'LINKEDIN',
-  FACEBOOK = 'FACEBOOK'
+  FACEBOOK = 'FACEBOOK',
 }
 
 export enum CMSPlatform {
   WEBFLOW = 'WEBFLOW',
   WORDPRESS = 'WORDPRESS',
-  MEDIUM = 'MEDIUM'
+  MEDIUM = 'MEDIUM',
 }
 
 export type Platform = SocialPlatform | CMSPlatform;
@@ -19,7 +19,9 @@ export const isValidPlatform = (platform: string): platform is Platform => {
   );
 };
 
-export const isSocialPlatform = (platform: string): platform is SocialPlatform => {
+export const isSocialPlatform = (
+  platform: string
+): platform is SocialPlatform => {
   return Object.values(SocialPlatform).includes(platform as SocialPlatform);
 };
 
