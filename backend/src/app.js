@@ -3,11 +3,12 @@ const cors = require("cors");
 const session = require("express-session");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const winston = require("winston");
 const passport = require("passport");
+const logger = require("./config/logger");
 const { validateOAuthConfig } = require("./config/oauth");
 const { sequelize, PlatformConnection } = require("./config/database");
 const { authenticateToken } = require("./middleware/auth");
+const cronService = require("./services/cron.service");
 
 // Import routes
 const authRoutes = require("./routes/auth");
@@ -19,26 +20,20 @@ const statsRoutes = require("./routes/stats");
 // Create Express app
 const app = express();
 
-// Configure logger
-const logger = winston.createLogger({
-	level: "info",
-	format: winston.format.json(),
-	transports: [
-		new winston.transports.File({ filename: "error.log", level: "error" }),
-		new winston.transports.File({ filename: "combined.log" }),
-	],
+// Log all HTTP requests
+app.use((req, res, next) => {
+    logger.info(`${req.method} ${req.url}`, {
+        ip: req.ip,
+        userAgent: req.get('user-agent')
+    });
+    next();
 });
-
-if (process.env.NODE_ENV !== "production") {
-	logger.add(
-		new winston.transports.Console({
-			format: winston.format.simple(),
-		})
-	);
-}
 
 // Validate OAuth configuration on startup
 validateOAuthConfig();
+
+// Initialize cron jobs
+cronService.initialize();
 
 // Security middleware
 app.use(helmet());

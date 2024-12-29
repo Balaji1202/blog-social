@@ -1,20 +1,20 @@
 const axios = require("axios");
 const { PlatformConnection } = require("../models/platform-connection");
 const { User } = require("../models/user");
-const platformConfig = require("../config/platforms");
+const oauthConfig = require("../config/oauth.config");
+const logger = require("../config/logger");
 
 class OAuthService {
   constructor() {
-    this.platformConfig = platformConfig;
+    this.config = oauthConfig;
   }
 
-  async generateAuthUrl(platform, userId) {
-    const config = this.platformConfig[platform];
+  async getAuthUrl(platform, state) {
+    const config = this.config[platform];
     if (!config) {
       throw new Error(`Unsupported platform: ${platform}`);
     }
 
-    const state = this.generateState(userId);
     const params = new URLSearchParams({
       client_id: config.clientId,
       redirect_uri: config.redirectUri,
@@ -26,22 +26,32 @@ class OAuthService {
     return `${config.authorizationUrl}?${params.toString()}`;
   }
 
-  async handleCallback(platform, code, state) {
-    const config = this.platformConfig[platform];
-    if (!config) {
-      throw new Error(`Unsupported platform: ${platform}`);
+  async handleCallback(platform, code, userId) {
+    try {
+      const config = this.config[platform];
+      if (!config) {
+        throw new Error(`Unsupported platform: ${platform}`);
+      }
+
+      const tokenData = await this.getAccessToken(platform, code);
+      const userInfo = await this.getUserInfo(platform, tokenData.access_token);
+
+      const connection = await this.savePlatformConnection(userId, platform, {
+        ...tokenData,
+        platformUserId: userInfo.id,
+        platformUsername: userInfo.username || userInfo.name,
+        metadata: userInfo
+      });
+
+      return connection;
+    } catch (error) {
+      logger.error('OAuth callback error:', error);
+      throw new Error(`Failed to handle OAuth callback: ${error.message}`);
     }
-
-    const userId = this.validateState(state);
-    const tokenResponse = await this.getAccessToken(platform, code);
-
-    await this.savePlatformConnection(userId, platform, tokenResponse);
-
-    return tokenResponse;
   }
 
   async getAccessToken(platform, code) {
-    const config = this.platformConfig[platform];
+    const config = this.config[platform];
     const params = new URLSearchParams({
       client_id: config.clientId,
       client_secret: config.clientSecret,
@@ -59,12 +69,29 @@ class OAuthService {
 
       return response.data;
     } catch (error) {
+      logger.error('Get access token error:', error);
       throw new Error(`Failed to get access token: ${error.message}`);
     }
   }
 
+  async getUserInfo(platform, accessToken) {
+    const config = this.config[platform];
+    try {
+      const response = await axios.get(config.userInfoUrl, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      return response.data.data || response.data;
+    } catch (error) {
+      logger.error('Get user info error:', error);
+      throw new Error(`Failed to get user info: ${error.message}`);
+    }
+  }
+
   async refreshAccessToken(platform, refreshToken) {
-    const config = this.platformConfig[platform];
+    const config = this.config[platform];
     const params = new URLSearchParams({
       client_id: config.clientId,
       client_secret: config.clientSecret,
@@ -81,48 +108,33 @@ class OAuthService {
 
       return response.data;
     } catch (error) {
+      logger.error('Refresh token error:', error);
       throw new Error(`Failed to refresh token: ${error.message}`);
     }
   }
 
   async savePlatformConnection(userId, platform, tokenData) {
     try {
-      const user = await User.findByPk(userId);
-      if (!user) {
-        throw new Error(`User not found: ${userId}`);
-      }
-
-      await PlatformConnection.upsert({
+      const [connection] = await PlatformConnection.upsert({
         userId,
         platform,
         accessToken: tokenData.access_token,
         refreshToken: tokenData.refresh_token,
+        tokenType: tokenData.token_type,
+        scope: tokenData.scope,
+        platformUserId: tokenData.platformUserId,
+        platformUsername: tokenData.platformUsername,
         expiresAt: tokenData.expires_in 
           ? new Date(Date.now() + tokenData.expires_in * 1000)
           : null,
+        metadata: tokenData.metadata || {},
+        active: true
       });
+
+      return connection;
     } catch (error) {
+      logger.error('Save platform connection error:', error);
       throw new Error(`Failed to save platform connection: ${error.message}`);
-    }
-  }
-
-  generateState(userId) {
-    return Buffer.from(JSON.stringify({ userId, timestamp: Date.now() })).toString("base64");
-  }
-
-  validateState(state) {
-    try {
-      const decoded = JSON.parse(Buffer.from(state, "base64").toString());
-      const { userId, timestamp } = decoded;
-
-      // Check if the state is not older than 1 hour
-      if (Date.now() - timestamp > 3600000) {
-        throw new Error("State has expired");
-      }
-
-      return userId;
-    } catch (error) {
-      throw new Error(`Invalid state: ${error.message}`);
     }
   }
 }
