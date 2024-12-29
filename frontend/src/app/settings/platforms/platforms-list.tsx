@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { PlatformConnector } from '@/components/platforms/PlatformConnector';
+import { PlatformConnector } from '@/components/platforms/platform-connector';
 import { useQuery } from '@tanstack/react-query';
 import { FaLinkedin, FaTwitter, FaMedium } from 'react-icons/fa';
 import { SiWebflow } from 'react-icons/si';
